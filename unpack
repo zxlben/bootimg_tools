@@ -1,0 +1,39 @@
+#!/bin/bash
+
+export PATH=$PATH:`pwd`
+
+#process boot arg
+boot=
+if [ -z "$1" ]
+then
+  boot=boot.img
+else
+  boot=$1
+fi
+echo "Boot = $boot"
+
+#make unpack dir
+dir=${boot%.*}
+mkdir -p "$dir"
+
+#unpack boot.img
+echo "#!/bin/sh" > repack
+echo 'export PATH=$PATH:`pwd`' >> repack
+echo "cd $dir">> repack
+echo "repack_ramdisk ramdisk" >> repack
+echo "cd .." >> repack
+echo "cp $dir/new-ramdisk.cpio.gz ramdisk.cpio.gz" >> repack
+echo "cp $dir/kernel kernel" >> repack
+unmkbootimg -i $boot >> repack 2>/dev/null
+echo "rm kernel" >> repack
+echo "rm ramdisk.cpio.gz" >> repack
+chmod +x repack
+
+#unpack ramdisk
+mv ramdisk.cpio.gz "$dir/ramdisk.cpio.gz"
+mv kernel "$dir/kernel"
+cd $dir
+unpack_ramdisk ramdisk.cpio.gz
+
+echo 'run repack to repack boot.img'
+exit 0

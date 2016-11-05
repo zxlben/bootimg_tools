@@ -1,0 +1,10 @@
+#!/bin/sh
+export PATH=$PATH:`pwd`
+cd boot
+repack_ramdisk ramdisk
+cd ..
+cp boot/new-ramdisk.cpio.gz ramdisk.cpio.gz
+cp boot/kernel kernel
+mkbootimg --base 0 --pagesize 2048 --kernel_offset 0x00008000 --ramdisk_offset 0x02000000 --second_offset 0x00f00000 --tags_offset 0x01e00000 --cmdline 'console=ttyHSL0,115200,n8 androidboot.console=ttyHSL0 androidboot.hardware=shamu msm_rtb.filter=0x37 ehci-hcd.park=3 utags.blkdev=/dev/block/platform/msm_sdcc.1/by-name/utags utags.backup=/dev/block/platform/msm_sdcc.1/by-name/utagsBackup coherent_pool=8M' --kernel kernel --ramdisk ramdisk.cpio.gz -o new_boot.img
+rm kernel
+rm ramdisk.cpio.gz
